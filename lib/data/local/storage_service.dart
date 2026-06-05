@@ -18,7 +18,8 @@ class StorageService {
   /// Used when the app opens to decide whether to show the Login screen or Dashboard.
   static Future<bool> isUserLoggedIn() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_keyIsLoggedIn) ?? false; // Default to false if not found
+    return prefs.getBool(_keyIsLoggedIn) ??
+        false; // Default to false if not found
   }
 
   /// 3. Get Active Username
