@@ -1,8 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// A service to handle persistent login state using SharedPreferences.
-/// As discussed, this securely acts as the key-value store to remember
-/// *who* is logged in, without storing the actual database.
+
 class StorageService {
   static const String _keyIsLoggedIn = 'isLoggedIn';
   static const String _keyUsername = 'loggedInUsername';
