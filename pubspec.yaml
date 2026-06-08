@@ -43,6 +43,8 @@ dependencies:
 
   #ML kit recognition engine
   google_mlkit_text_recognition: ^0.13.0
+  image: ^4.3.0
+  image_cropper: ^7.0.0
 
   #Shared Preferences
   shared_preferences: ^2.4.1

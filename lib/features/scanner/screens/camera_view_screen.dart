@@ -32,13 +32,13 @@ class _CameraViewScreenState extends State<CameraViewScreen> {
   }
 
   Future<void> _handleCapture() async {
-    final text = await _controller.captureImage();
-    if (mounted && text != null && text.isNotEmpty) {
-      Navigator.pushNamed(context, AppRoutes.confirmation, arguments: text);
+    final imagePath = await _controller.captureImage();
+    if (mounted && imagePath != null && imagePath.isNotEmpty) {
+      Navigator.pushNamed(context, AppRoutes.cropping, arguments: imagePath);
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Failed to read meter or no text found. Please try again.'),
+          content: Text('Failed to take picture. Please try again.'),
           backgroundColor: AppTheme.errorRed,
         ),
       );
@@ -152,6 +152,26 @@ class _CameraViewScreenState extends State<CameraViewScreen> {
                               ),
                             ],
                           ),
+                          
+                          // Flashlight toggle button (Moved here so it sits on top of the dark overlay!)
+                          if (_controller.isCameraInitialized)
+                            Positioned(
+                              top: 16,
+                              right: 16,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.5),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: IconButton(
+                                  icon: Icon(
+                                    _controller.isFlashOn ? Icons.flash_on : Icons.flash_off,
+                                    color: AppTheme.primaryYellow,
+                                  ),
+                                  onPressed: () => _controller.toggleFlash(),
+                                ),
+                              ),
+                            ),
 
                           if (_controller.isProcessing)
                             Container(

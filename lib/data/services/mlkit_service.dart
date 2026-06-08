@@ -6,6 +6,7 @@ class MLKitService {
   final TextRecognizer _textRecognizer = TextRecognizer(
     script: TextRecognitionScript.latin,
   );
+  
   //Camera logic
   Future<CameraController?> initializeCamera() async {
     try {
@@ -31,7 +32,7 @@ class MLKitService {
       return controller;
     } catch (e) {
       // Handle permission denied or camera errors here
-      print('Camera initialization error: $e');
+      print('Camera initialization error: \$e');
       return null;
     }
   }
@@ -52,29 +53,26 @@ class MLKitService {
       // Pass it through the cleaning logic
       return _cleanExtractedText(fullRawText);
     } catch (e) {
-      print('ML Kit Processing Error: $e');
+      print('ML Kit Processing Error: \$e');
       return null;
     }
   }
 
   //Cleaning logic
-  //Removes all letters, symbols, spaces, and formatting, leaving only the meter number.
   String _cleanExtractedText(String rawText) {
-    // Remove all characters EXCEPT digits (0-9) and the decimal point (.)
-    // This strips out "kWh", spaces, dashes, or accidental OCR noise.
-    String cleaned = rawText.replaceAll(RegExp(r'[^0-9.]'), '');
+    // Rule A (Numeric Only): Strip all alphabetical text and noise.
+    String numbersOnly = rawText.replaceAll(RegExp(r'[^0-9\s]'), ' ');
 
-    // OCR sometimes misinterprets noise as extra decimals.
-    // If multiple decimals exist, we keep only the first one to ensure it's a valid number.
-    if (cleaned.contains('.')) {
-      List<String> parts = cleaned.split('.');
-      if (parts.length > 2) {
-        // Reconstruct string keeping only the first decimal point
-        cleaned = '${parts[0]}.${parts.sublist(1).join('')}';
-      }
+    // Rule B (Length Match): Reject sequences that look like long serial numbers 
+    Iterable<Match> matches = RegExp(r'\b\d{5,8}\b').allMatches(numbersOnly);
+
+    for (Match m in matches) {
+      String sequence = m.group(0)!;
+      // Rule C (Red Decimal Elimination): If we matched 5 to 8 digits, 
+      return sequence.substring(0, 5);
     }
 
-    return cleaned;
+    return ''; // Return empty if no valid sequence is found
   }
 
   // Disposing the recognizer to prevent memory leaks
