@@ -34,6 +34,9 @@ dependencies:
   #Local DB 
   isar: ^3.1.0+1
   isar_flutter_libs: ^3.1.0+1
+
+  #intl for date formatting
+  intl: ^0.19.0
   
   #File system
   path_provider: ^2.1.5

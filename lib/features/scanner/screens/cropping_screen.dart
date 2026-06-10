@@ -43,6 +43,12 @@ class _CroppingScreenState extends State<CroppingScreen> {
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
         centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.menu, color: Colors.black),
+          onPressed: () {
+            Navigator.pushNamed(context, AppRoutes.menu, arguments: AppRoutes.cropping);
+          },
+        ),
       ),
       body: _isProcessing 
           ? const Center(child: CircularProgressIndicator(color: AppTheme.primaryYellow))

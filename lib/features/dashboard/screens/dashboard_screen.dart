@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../../core/app_theme.dart';
 import '../../../routes.dart';
 import '../../../data/local/storage_service.dart';
+import '../widgets/history_widget.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -28,14 +30,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  Future<void> _handleLogout() async {
-    await StorageService.clearSession();
-    if (mounted) {
-      Navigator.pushNamedAndRemoveUntil(
-          context, AppRoutes.login, (route) => false);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,7 +39,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.menu, color: AppTheme.textDark),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pushNamed(context, AppRoutes.menu, arguments: AppRoutes.dashboard);
+          },
         ),
         title: const Text(
           'Dashboard',
@@ -56,11 +52,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           IconButton(
             icon: const Icon(Icons.notifications_none, color: AppTheme.primaryYellow),
             onPressed: () {},
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout, color: AppTheme.textDark),
-            onPressed: _handleLogout,
-            tooltip: 'Logout',
           ),
         ],
       ),
@@ -85,7 +76,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const SizedBox(height: 24),
 
             // My Usage Chart Card
-            _buildUsageChartCard(),
+            HistoryWidget(username: _username),
           ],
         ),
       ),
@@ -111,9 +102,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Before 30 Oct 2021',
-            style: TextStyle(
+          Text(
+            'Before 30 ${DateFormat('MMM yyyy').format(DateTime.now())}',
+            style: const TextStyle(
               fontSize: 14,
               color: AppTheme.textDark,
             ),
@@ -194,7 +185,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Expanded(
                 child: ElevatedButton(
                   style: AppTheme.darkButtonStyle,
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.pushNamed(context, AppRoutes.history);
+                  },
                   child: const Text('View Bills'),
                 ),
               ),
@@ -202,74 +195,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildUsageChartCard() {
-    return Container(
-      padding: const EdgeInsets.all(24.0),
-      decoration: BoxDecoration(
-        color: AppTheme.primaryYellow,
-        borderRadius: BorderRadius.circular(24.0),
-      ),
-      child: Column(
-        children: [
-          const Text(
-            'My Usage',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.textDark,
-            ),
-          ),
-          const SizedBox(height: 24),
-          
-          // Simple Bar Chart Mockup
-          SizedBox(
-            height: 150,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildBar('Jan', 60),
-                _buildBar('Feb', 75),
-                _buildBar('Mar', 90),
-                _buildBar('Apr', 65),
-                _buildBar('May', 110),
-                _buildBar('Jun', 80),
-                _buildBar('Jul', 95),
-                _buildBar('Aug', 105),
-                _buildBar('Sep', 75),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBar(String label, double height) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Container(
-          width: 12,
-          height: height,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 10,
-            color: AppTheme.textDark,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
     );
   }
 }

@@ -75,8 +75,8 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppTheme.primaryYellow),
-          onPressed: () => Navigator.pop(context), 
+          icon: const Icon(Icons.menu, color: Colors.black),
+          onPressed: () => Navigator.pushNamed(context, AppRoutes.menu, arguments: AppRoutes.confirmation),
         ),
         title: const Text('Confirm Meter Reading', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
         centerTitle: true,

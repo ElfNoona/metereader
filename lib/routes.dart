@@ -5,6 +5,8 @@ import 'features/dashboard/screens/dashboard_screen.dart';
 import 'features/scanner/screens/camera_view_screen.dart';
 import 'features/scanner/screens/cropping_screen.dart';
 import 'features/scanner/screens/confirmation_screen.dart';
+import 'features/screens/reading_history_screen.dart';
+import 'features/screens/menu_screen.dart';
 
 class AppRoutes {
   static const String login = '/';
@@ -13,6 +15,8 @@ class AppRoutes {
   static const String camera = '/camera';
   static const String cropping = '/cropping';
   static const String confirmation = '/confirmation';
+  static const String history = '/history';
+  static const String menu = '/menu';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -34,6 +38,11 @@ class AppRoutes {
         return MaterialPageRoute(
           builder: (_) => ConfirmationScreen(extractedText: args ?? ''),
         );
+      case history:
+        return MaterialPageRoute(builder: (_) => const ReadingHistoryScreen());
+      case menu:
+        final activeRoute = settings.arguments as String?;
+        return MaterialPageRoute(builder: (_) => MenuScreen(activeRoute: activeRoute ?? ''));
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(

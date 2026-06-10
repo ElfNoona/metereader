@@ -54,7 +54,9 @@ class _CameraViewScreenState extends State<CameraViewScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.menu, color: Colors.black),
-          onPressed: () {}, // Hamburger menu
+          onPressed: () {
+            Navigator.pushNamed(context, AppRoutes.menu, arguments: AppRoutes.camera);
+          },
         ),
         title: const Text('Submit Reading', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
         centerTitle: true,
