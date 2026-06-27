@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../core/app_theme.dart';
-import '../../../data/local/isar_service.dart';
-import '../../../data/local/schemas/reading_schema.dart';
+import '../../../data/models/reading_model.dart';
+import '../dashboard/controllers/dashboard_controller.dart';
 import '../../../data/local/storage_service.dart';
 import '../../../routes.dart';
 
@@ -14,8 +14,8 @@ class ReadingHistoryScreen extends StatefulWidget {
 }
 
 class _ReadingHistoryScreenState extends State<ReadingHistoryScreen> {
-  final _isarService = IsarService();
-  List<MeterReading> _readings = [];
+  final _dashboardController = DashboardController();
+  List<ReadingModel> _readings = [];
   bool _isLoading = true;
 
   @override
@@ -26,20 +26,15 @@ class _ReadingHistoryScreenState extends State<ReadingHistoryScreen> {
 
   Future<void> _loadHistory() async {
     try {
-      final username = await StorageService.getLoggedInUsername();
-      if (username != null) {
-        final history = await _isarService.getReadingsForUser(username);
-        if (mounted) {
-          setState(() {
-            _readings = history;
-            _isLoading = false;
-          });
-        }
-      } else {
-        if (mounted) setState(() => _isLoading = false);
+      await _dashboardController.fetchHistory();
+      if (mounted) {
+        setState(() {
+          _readings = _dashboardController.readings;
+          _isLoading = false;
+        });
       }
     } catch (e) {
-      print('Error loading reading history: \$e');
+      print('Error loading reading history: $e');
       if (mounted) setState(() => _isLoading = false);
     }
   }
@@ -101,8 +96,8 @@ class _ReadingHistoryScreenState extends State<ReadingHistoryScreen> {
     );
   }
 
-  Widget _buildHistoryCard(MeterReading reading) {
-    final formattedDate = DateFormat('dd MMM yyyy, hh:mm a').format(reading.timestamp);
+  Widget _buildHistoryCard(ReadingModel reading) {
+    final formattedDate = reading.timestamp != null ? DateFormat('dd MMM yyyy, hh:mm a').format(reading.timestamp!) : 'N/A';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16.0),

@@ -22,7 +22,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _loadUser() async {
-    final username = await StorageService.getLoggedInUsername();
+    final username = await StorageService.getUserId();
     if (mounted) {
       setState(() {
         _username = username ?? 'User';

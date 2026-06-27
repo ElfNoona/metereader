@@ -1,39 +1,48 @@
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-/// A service to handle persistent login state using SharedPreferences.
-
+/// A service to handle persistent session state securely using native keystores.
 class StorageService {
-  static const String _keyIsLoggedIn = 'isLoggedIn';
-  static const String _keyUsername = 'loggedInUsername';
+  static const _storage = FlutterSecureStorage();
+
+  static const String _keyAccessToken = 'accessToken';
+  static const String _keyRefreshToken = 'refreshToken';
+  static const String _keyUserId = 'userId';
 
   /// 1. Start a Session (Login/Signup)
-  /// Saves the active username and sets the logged-in flag to true.
-  static Future<void> startSession(String username) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_keyIsLoggedIn, true);
-    await prefs.setString(_keyUsername, username);
+  /// Saves the JWT tokens and user ID into the secure enclave.
+  static Future<void> startSession(String accessToken, String refreshToken, String userId) async {
+    await _storage.write(key: _keyAccessToken, value: accessToken);
+    await _storage.write(key: _keyRefreshToken, value: refreshToken);
+    await _storage.write(key: _keyUserId, value: userId);
   }
 
   /// 2. Check Login Status
-  /// Used when the app opens to decide whether to show the Login screen or Dashboard.
+  /// Returns true if an access token exists.
   static Future<bool> isUserLoggedIn() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_keyIsLoggedIn) ??
-        false; // Default to false if not found
+    final token = await _storage.read(key: _keyAccessToken);
+    return token != null && token.isNotEmpty;
   }
 
-  /// 3. Get Active Username
-  /// Used to query Isar for the correct user's reading history.
-  static Future<String?> getLoggedInUsername() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_keyUsername);
+  /// 3. Get Active User ID
+  static Future<String?> getUserId() async {
+    return await _storage.read(key: _keyUserId);
   }
 
-  /// 4. End Session (Logout)
-  /// Clears the saved keys so the app forces a login next time.
+  /// 4. Get Access Token
+  static Future<String?> getAccessToken() async {
+    return await _storage.read(key: _keyAccessToken);
+  }
+
+  /// 5. Get Refresh Token
+  static Future<String?> getRefreshToken() async {
+    return await _storage.read(key: _keyRefreshToken);
+  }
+
+  /// 6. End Session (Logout)
+  /// Clears the securely saved keys.
   static Future<void> clearSession() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_keyIsLoggedIn);
-    await prefs.remove(_keyUsername);
+    await _storage.delete(key: _keyAccessToken);
+    await _storage.delete(key: _keyRefreshToken);
+    await _storage.delete(key: _keyUserId);
   }
 }

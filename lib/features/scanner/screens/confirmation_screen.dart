@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/app_theme.dart';
 import '../../../core/validators.dart';
-import '../../../data/local/isar_service.dart';
+
 import '../../../data/local/storage_service.dart';
 import '../../../routes.dart';
 
@@ -16,7 +16,6 @@ class ConfirmationScreen extends StatefulWidget {
 
 class _ConfirmationScreenState extends State<ConfirmationScreen> {
   late TextEditingController _textController;
-  final _isarService = IsarService();
   bool _isSaving = false;
 
   @override
@@ -43,27 +42,14 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
       return;
     }
 
-    setState(() => _isSaving = true);
-
-    try {
-      final username = await StorageService.getLoggedInUsername();
-      if (username != null) {
-        await _isarService.saveMeterReading(username, double.parse(readingStr));
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Reading saved successfully!'))
-          );
-          Navigator.pushNamedAndRemoveUntil(context, AppRoutes.dashboard, (route) => false);
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving: $e'), backgroundColor: AppTheme.errorRed)
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isSaving = false);
+    // Since the reading was already uploaded by ScannerController 
+    // and processed by the server, "Confirming" just completes the flow.
+    // If the backend needs a separate confirm step, the ApiService call would go here.
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Reading confirmed!'))
+      );
+      Navigator.pushNamedAndRemoveUntil(context, AppRoutes.dashboard, (route) => false);
     }
   }
 

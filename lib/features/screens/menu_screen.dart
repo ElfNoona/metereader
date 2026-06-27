@@ -21,7 +21,7 @@ class _MenuScreenState extends State<MenuScreen> {
   }
 
   Future<void> _loadUser() async {
-    final username = await StorageService.getLoggedInUsername();
+    final username = await StorageService.getUserId();
     if (mounted) {
       setState(() {
         _username = username ?? 'A.B.C.Perera';
