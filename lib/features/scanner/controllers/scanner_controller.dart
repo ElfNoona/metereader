@@ -1,7 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
-import 'package:dio/dio.dart';
+import '../../../data/remote/api_service.dart';
 import '../../../data/local/storage_service.dart';
 
 class ScannerController extends ChangeNotifier {
@@ -10,8 +10,10 @@ class ScannerController extends ChangeNotifier {
   bool isProcessing = false;
   bool isFlashOn = false;
   
-  // NOTE: You'll eventually want to route this through your custom ApiService.
-  final Dio _dio = Dio(BaseOptions(baseUrl: 'http://10.0.2.2:5000/api'));
+  final ApiService _apiService;
+
+  ScannerController({ApiService? apiService}) 
+    : _apiService = apiService ?? ApiService();
 
   Future<void> toggleFlash() async {
     if (cameraController == null || !cameraController!.value.isInitialized) return;
@@ -85,19 +87,15 @@ class ScannerController extends ChangeNotifier {
         isProcessing = true;
         notifyListeners();
 
-        final token = await StorageService.getAccessToken();
         final userId = await StorageService.getUserId() ?? '';
 
-        final formData = FormData.fromMap({
-          'image': await MultipartFile.fromFile(croppedFile.path),
-          'userId': userId,
-          'isManualOverride': 'false',
-        });
-
-        final response = await _dio.post(
+        final response = await _apiService.uploadFile(
           '/reading/submit',
-          data: formData,
-          options: Options(headers: {'Authorization': 'Bearer $token'}),
+          croppedFile.path,
+          {
+            'userId': userId,
+            'isManualOverride': 'false',
+          }
         );
 
         isProcessing = false;

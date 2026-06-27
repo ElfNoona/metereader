@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
+import '../../../data/remote/api_service.dart';
 import '../../../data/local/storage_service.dart';
 
 /// Controller for managing Authentication state and business logic.
@@ -7,9 +7,10 @@ class AuthController extends ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
-  // Ideally this is handled by the ApiService singleton you are writing.
-  // Using direct Dio here temporarily for functional flow.
-  final Dio _dio = Dio(BaseOptions(baseUrl: 'http://10.0.2.2:5000/api'));
+  final ApiService _apiService;
+
+  AuthController({ApiService? apiService}) 
+    : _apiService = apiService ?? ApiService();
 
   void _setLoading(bool value) {
     _isLoading = value;
@@ -20,7 +21,7 @@ class AuthController extends ChangeNotifier {
   Future<bool> login(String username, String password) async {
     _setLoading(true);
     try {
-      final response = await _dio.post('/auth/login', data: {
+      final response = await _apiService.post('/auth/login', data: {
         'username': username,
         'password': password,
       });
@@ -47,7 +48,7 @@ class AuthController extends ChangeNotifier {
   Future<bool> signUp(String username, String password) async {
     _setLoading(true);
     try {
-      final response = await _dio.post('/auth/signup', data: {
+      final response = await _apiService.post('/auth/signup', data: {
         'username': username,
         'password': password,
         'fullName': username, 

@@ -16,7 +16,7 @@ class ConfirmationScreen extends StatefulWidget {
 
 class _ConfirmationScreenState extends State<ConfirmationScreen> {
   late TextEditingController _textController;
-  bool _isSaving = false;
+  final bool _isSaving = false;
 
   @override
   void initState() {
