@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/app_theme.dart';
-import '../../../../data/models/reading_model.dart';
+import '../../../../data/models/history_item_model.dart';
 import '../controllers/dashboard_controller.dart';
 
 class HistoryWidget extends StatefulWidget {
@@ -15,7 +15,7 @@ class HistoryWidget extends StatefulWidget {
 
 class _HistoryWidgetState extends State<HistoryWidget> {
   final _dashboardController = DashboardController();
-  List<ReadingModel> _readings = [];
+  List<HistoryItemModel> _historyItems = [];
   bool _isLoading = true;
 
   @override
@@ -37,26 +37,21 @@ class _HistoryWidgetState extends State<HistoryWidget> {
     
     try {
       await _dashboardController.fetchHistory();
-      final allReadings = _dashboardController.readings;
+      final allItems = _dashboardController.historyItems;
       
-      // Filter to the last 6 months only
       final now = DateTime.now();
       final sixMonthsAgo = DateTime(now.year, now.month - 6, now.day);
       
-      final recentReadings = allReadings.where((r) => r.timestamp != null && r.timestamp!.isAfter(sixMonthsAgo)).toList();
+      final recentItems = allItems.where((item) => item.reading.timestamp != null && item.reading.timestamp!.isAfter(sixMonthsAgo)).toList();
       
-      // Sort chronologically (oldest first) for the chart
-      recentReadings.sort((a, b) => a.timestamp!.compareTo(b.timestamp!));
+      recentItems.sort((a, b) => a.reading.timestamp!.compareTo(b.reading.timestamp!));
       
-      // Take up to the last 6 chronological readings if there are many in the same month
-      // Or we can just display the last 6 readings in general. 
-      // Let's display up to the last 6 readings
-      final displayReadings = recentReadings.length > 6 
-          ? recentReadings.sublist(recentReadings.length - 6) 
-          : recentReadings;
+      final displayItems = recentItems.length > 6 
+          ? recentItems.sublist(recentItems.length - 6) 
+          : recentItems;
 
       setState(() {
-        _readings = displayReadings;
+        _historyItems = displayItems;
         _isLoading = false;
       });
     } catch (e) {
@@ -93,7 +88,7 @@ class _HistoryWidgetState extends State<HistoryWidget> {
               height: 150,
               child: Center(child: CircularProgressIndicator(color: AppTheme.textDark)),
             )
-          else if (_readings.isEmpty)
+          else if (_historyItems.isEmpty)
             const SizedBox(
               height: 150,
               child: Center(
@@ -118,22 +113,18 @@ class _HistoryWidgetState extends State<HistoryWidget> {
   }
 
   List<Widget> _buildBars() {
-    if (_readings.isEmpty) return [];
+    if (_historyItems.isEmpty) return [];
 
-    // Find the maximum value to scale the bars proportionally
-    double maxValue = _readings.map((r) => r.readingValue.toDouble()).reduce((a, b) => a > b ? a : b);
+    double maxValue = _historyItems.map((item) => item.reading.readingValue.toDouble()).reduce((a, b) => a > b ? a : b);
     
-    // Fallback if max is 0 to avoid division by zero
     if (maxValue == 0) maxValue = 1;
 
-    final maxHeight = 110.0; // The max physical height we want a bar to be
+    final maxHeight = 110.0; 
 
-    return _readings.map((reading) {
-      // Calculate proportional height
-      final barHeight = (reading.readingValue.toDouble() / maxValue) * maxHeight;
+    return _historyItems.map((item) {
+      final barHeight = (item.reading.readingValue.toDouble() / maxValue) * maxHeight;
       
-      // Format month label (e.g. 'Jan')
-      final monthLabel = reading.timestamp != null ? DateFormat('MMM').format(reading.timestamp!) : 'Unk';
+      final monthLabel = item.reading.timestamp != null ? DateFormat('MMM').format(item.reading.timestamp!) : 'Unk';
       
       return _buildSingleBar(monthLabel, barHeight.clamp(10.0, maxHeight));
     }).toList();

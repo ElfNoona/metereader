@@ -93,6 +93,17 @@ class ApiService {
     }
   }
 
+  Future<Response> downloadBytes(String path) async {
+    try {
+      return await _dio.get(
+        path,
+        options: Options(responseType: ResponseType.bytes),
+      );
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
   Future<Response> post(String path, {dynamic data}) async {
     try {
       return await _dio.post(path, data: data);

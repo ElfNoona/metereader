@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import '../../../core/app_theme.dart';
 import '../../../core/validators.dart';
 
-import '../../../data/local/storage_service.dart';
+import '../../../data/remote/api_service.dart';
 import '../../../routes.dart';
 
 class ConfirmationScreen extends StatefulWidget {
+  final String readingId;
   final String extractedText;
 
-  const ConfirmationScreen({super.key, required this.extractedText});
+  const ConfirmationScreen({super.key, required this.readingId, required this.extractedText});
 
   @override
   State<ConfirmationScreen> createState() => _ConfirmationScreenState();
@@ -16,7 +17,7 @@ class ConfirmationScreen extends StatefulWidget {
 
 class _ConfirmationScreenState extends State<ConfirmationScreen> {
   late TextEditingController _textController;
-  final bool _isSaving = false;
+  bool _isSaving = false;
 
   @override
   void initState() {
@@ -42,14 +43,26 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
       return;
     }
 
-    // Since the reading was already uploaded by ScannerController 
-    // and processed by the server, "Confirming" just completes the flow.
-    // If the backend needs a separate confirm step, the ApiService call would go here.
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Reading confirmed!'))
-      );
-      Navigator.pushNamedAndRemoveUntil(context, AppRoutes.dashboard, (route) => false);
+      setState(() => _isSaving = true);
+      try {
+        final apiService = ApiService();
+        final response = await apiService.post('/billing/generate', data: {
+          'readingId': widget.readingId
+        });
+        setState(() => _isSaving = false);
+        if (response.statusCode == 201) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Bill generated successfully!'))
+          );
+          Navigator.pushNamedAndRemoveUntil(context, AppRoutes.dashboard, (route) => false);
+        }
+      } catch (e) {
+        setState(() => _isSaving = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error generating bill: $e'), backgroundColor: AppTheme.errorRed)
+        );
+      }
     }
   }
 

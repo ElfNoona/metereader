@@ -65,7 +65,7 @@ class ScannerController extends ChangeNotifier {
   }
 
   // Opens the native cropper and then uploads the cropped result to the backend.
-  Future<String?> cropAndProcessImage(String imagePath) async {
+  Future<Map<String, String>?> cropAndProcessImage(String imagePath) async {
     try {
       CroppedFile? croppedFile = await ImageCropper().cropImage(
         sourcePath: imagePath,
@@ -102,8 +102,10 @@ class ScannerController extends ChangeNotifier {
         notifyListeners();
 
         if (response.statusCode == 200 || response.statusCode == 201) {
-           // Safely extract the raw value parsed by the server ML kit
-           return response.data['reading']['rawOcrValue'].toString();
+           return {
+             'readingId': response.data['reading']['_id'].toString(),
+             'extractedText': response.data['reading']['rawOcrValue'].toString()
+           };
         }
         return null;
       }

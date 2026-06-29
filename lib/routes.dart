@@ -34,9 +34,12 @@ class AppRoutes {
           builder: (_) => CroppingScreen(imagePath: imagePath),
         );
       case confirmation:
-        final args = settings.arguments as String?;
+        final args = settings.arguments as Map<String, String>?;
         return MaterialPageRoute(
-          builder: (_) => ConfirmationScreen(extractedText: args ?? ''),
+          builder: (_) => ConfirmationScreen(
+            readingId: args?['readingId'] ?? '',
+            extractedText: args?['extractedText'] ?? '',
+          ),
         );
       case history:
         return MaterialPageRoute(builder: (_) => const ReadingHistoryScreen());

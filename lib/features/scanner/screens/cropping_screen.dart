@@ -18,11 +18,11 @@ class _CroppingScreenState extends State<CroppingScreen> {
 
   Future<void> _handleCrop() async {
     setState(() => _isProcessing = true);
-    final extractedText = await _controller.cropAndProcessImage(widget.imagePath);
+    final result = await _controller.cropAndProcessImage(widget.imagePath);
     setState(() => _isProcessing = false);
 
-    if (mounted && extractedText != null && extractedText.isNotEmpty) {
-      Navigator.pushReplacementNamed(context, AppRoutes.confirmation, arguments: extractedText);
+    if (mounted && result != null && result['extractedText'] != null && result['extractedText']!.isNotEmpty) {
+      Navigator.pushReplacementNamed(context, AppRoutes.confirmation, arguments: result);
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
