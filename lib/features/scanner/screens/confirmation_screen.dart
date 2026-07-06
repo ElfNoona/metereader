@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import '../../../core/app_theme.dart';
 import '../../../core/validators.dart';
 
+import '../../../data/local/storage_service.dart';
 import '../../../data/remote/api_service.dart';
 import '../../../routes.dart';
 
 class ConfirmationScreen extends StatefulWidget {
-  final String readingId;
+  final String imagePath;
   final String extractedText;
 
-  const ConfirmationScreen({super.key, required this.readingId, required this.extractedText});
+  const ConfirmationScreen({super.key, required this.imagePath, required this.extractedText});
 
   @override
   State<ConfirmationScreen> createState() => _ConfirmationScreenState();
@@ -47,11 +48,31 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
       setState(() => _isSaving = true);
       try {
         final apiService = ApiService();
-        final response = await apiService.post('/billing/generate', data: {
-          'readingId': widget.readingId
+        final userId = await StorageService.getUserId() ?? '';
+
+        // Step 1: Submit reading to Node.js backend to save in DB
+        final submitResponse = await apiService.uploadFile(
+          '/reading/submit',
+          widget.imagePath,
+          {
+            'userId': userId,
+            'manualValue': readingStr,
+          }
+        );
+
+        if (submitResponse.statusCode != 200 && submitResponse.statusCode != 201) {
+          throw Exception('Failed to save reading');
+        }
+
+        final readingId = submitResponse.data['reading']['_id'].toString();
+
+        // Step 2: Generate bill using the new reading ID
+        final generateResponse = await apiService.post('/billing/generate', data: {
+          'readingId': readingId
         });
+        
         setState(() => _isSaving = false);
-        if (response.statusCode == 201) {
+        if (generateResponse.statusCode == 201) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Bill generated successfully!'))
           );

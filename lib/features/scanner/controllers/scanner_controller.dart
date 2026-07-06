@@ -2,7 +2,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import '../../../data/remote/api_service.dart';
-import '../../../data/local/storage_service.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ScannerController extends ChangeNotifier {
   CameraController? cameraController;
@@ -87,15 +87,11 @@ class ScannerController extends ChangeNotifier {
         isProcessing = true;
         notifyListeners();
 
-        final userId = await StorageService.getUserId() ?? '';
-
-        final response = await _apiService.uploadFile(
-          '/reading/submit',
+        final mlServerUrl = dotenv.env['ML_SERVER_URL'] ?? '';
+        
+        final response = await _apiService.uploadImageToCompanyML(
+          mlServerUrl, 
           croppedFile.path,
-          {
-            'userId': userId,
-            'isManualOverride': 'false',
-          }
         );
 
         isProcessing = false;
@@ -103,8 +99,8 @@ class ScannerController extends ChangeNotifier {
 
         if (response.statusCode == 200 || response.statusCode == 201) {
            return {
-             'readingId': response.data['reading']['_id'].toString(),
-             'extractedText': response.data['reading']['rawOcrValue'].toString()
+             'imagePath': croppedFile.path,
+             'extractedText': response.data['reading'].toString()
            };
         }
         return null;

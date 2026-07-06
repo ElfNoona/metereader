@@ -37,7 +37,7 @@ class AppRoutes {
         final args = settings.arguments as Map<String, String>?;
         return MaterialPageRoute(
           builder: (_) => ConfirmationScreen(
-            readingId: args?['readingId'] ?? '',
+            imagePath: args?['imagePath'] ?? '',
             extractedText: args?['extractedText'] ?? '',
           ),
         );

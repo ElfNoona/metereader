@@ -2,14 +2,15 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import '../../main.dart';
 import '../local/storage_service.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiService {
   static final ApiService _instance = ApiService._internal();
   factory ApiService() => _instance;
 
   late final Dio _dio;
-
-  static const String _baseUrl = 'http://10.0.2.2:5000/api';
+  
+  static String get _baseUrl => dotenv.env['API_BASE_URL'] ?? '';
 
   ApiService._internal() {
     _dio = Dio(
@@ -29,22 +30,31 @@ class ApiService {
     );
   }
 
+  /// Appends standard JWT access tokens only if the request is targeting our own backend.
   Future<void> _onRequestInterceptor(
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    final accessToken = await StorageService.getAccessToken();
-    if (accessToken != null && accessToken.isNotEmpty) {
-      options.headers['Authorization'] = 'Bearer $accessToken';
+    final isInternalRequest = options.path.startsWith(_baseUrl) || !options.path.startsWith('http');
+    
+    if (isInternalRequest) {
+      final accessToken = await StorageService.getAccessToken();
+      if (accessToken != null && accessToken.isNotEmpty) {
+        options.headers['Authorization'] = 'Bearer $accessToken';
+      }
     }
     return handler.next(options);
   }
 
+  /// Intercepts 401 token expiration errors strictly for our internal Node.js backend.
   Future<void> _onErrorInterceptor(
     DioException err,
     ErrorInterceptorHandler handler,
   ) async {
-    if (err.response?.statusCode != 401) {
+    final isInternalRequest = err.requestOptions.path.startsWith(_baseUrl) || !err.requestOptions.path.startsWith('http');
+
+    // Only attempt token refresh if it's a 401 error originating from our own server
+    if (err.response?.statusCode != 401 || !isInternalRequest) {
       return handler.next(err);
     }
 
@@ -127,6 +137,32 @@ class ApiService {
 
       return await _dio.post(
         path,
+        data: formData,
+        options: Options(contentType: 'multipart/form-data'),
+      );
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  /// Sends the captured cropped image directly and synchronously to company's hosted ML microserver.
+  /// Bypasses Node.js JWT parameters since the path uses an external absolute URL.
+  Future<Response> uploadImageToCompanyML(String mlServerUrl, String localFilePath) async {
+    try {
+      final file = File(localFilePath);
+      if (!await file.exists()) throw Exception("Cropped meter image file not found.");
+
+      final formData = FormData.fromMap({
+        'image': await MultipartFile.fromFile(
+          file.path,
+          filename: file.path.split('/').last,
+        ),
+      });
+
+      // Directly posting to the company's full URL. Dio automatically ignores the 
+      // internal base URL when a request path starts with "http://" or "https://".
+      return await _dio.post(
+        mlServerUrl,
         data: formData,
         options: Options(contentType: 'multipart/form-data'),
       );
