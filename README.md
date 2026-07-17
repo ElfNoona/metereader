@@ -1,4 +1,4 @@
-# 📱 Metereader Flutter App
+#  Metereader Flutter App
 
 [![Flutter Version](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter)](https://flutter.dev/)
 [![Dart Version](https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart)](https://dart.dev/)
@@ -10,18 +10,18 @@ A sleek, modern, and cross-platform mobile application built with Flutter. Meter
 
 ---
 
-## ✨ Key Features
+##  Key Features
 
-- **📸 Smart Camera Integration:** Natively captures high-resolution meter images with flash control.
-- **✂️ Image Cropping:** Built-in UI to crop and focus strictly on the meter digits before processing.
-- **🤖 Edge-to-Cloud ML:** Synchronously sends the cropped image to a dedicated Python ML Microserver for optical character recognition (OCR) and auto-fills the reading field.
-- **🔐 Secure Sessions:** Manages JWT Access and Refresh tokens using encrypted local storage. 
-- **💸 One-Tap Billing:** Chained API logic that instantly generates an IGL tariff bill right after the user confirms their reading.
-- **📄 PDF Viewer:** Securely downloads and triggers the native PDF viewer for generated invoices.
+- **Smart Camera Integration:** Natively captures high-resolution meter images with flash control.
+- **Image Cropping:** Built-in UI to crop and focus strictly on the meter digits before processing.
+- **Edge-to-Cloud ML:** Synchronously sends the cropped image to a dedicated Python ML Microserver for optical character recognition (OCR) and auto-fills the reading field.
+- **Secure Sessions:** Manages JWT Access and Refresh tokens using encrypted local storage. 
+- **One-Tap Billing:** Chained API logic that instantly generates an IGL tariff bill right after the user confirms their reading.
+- **PDF Viewer:** Securely downloads and triggers the native PDF viewer for generated invoices.
 
 ---
 
-## 🛠️ Technology Stack
+##  Technology Stack
 
 - **Framework:** Flutter (Dart)
 - **Networking:** `dio` (with custom JWT interceptors)
@@ -31,7 +31,7 @@ A sleek, modern, and cross-platform mobile application built with Flutter. Meter
 
 ---
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Prerequisites
 - [Flutter SDK](https://docs.flutter.dev/get-started/install) installed on your machine.
@@ -69,7 +69,7 @@ A sleek, modern, and cross-platform mobile application built with Flutter. Meter
 
 ---
 
-## 🏗️ Architecture & Flow
+##  Architecture & Flow
 
 The app follows a clean, feature-driven folder structure:
 
@@ -98,7 +98,7 @@ lib/
 
 ---
 
-## 🤝 Contributing
+##  Contributing
 
 1. Fork the Project
 2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
@@ -106,6 +106,6 @@ lib/
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## 📜 License
+##  License
 
 Distributed under the MIT License. See `LICENSE` for more information.
